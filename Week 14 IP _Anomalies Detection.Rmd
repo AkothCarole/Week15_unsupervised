@@ -59,5 +59,4 @@ part4 %>%
     time_recompose() %>%
     plot_anomalies(time_recomposed = TRUE, ncol = 3, alpha_dots = 0.5)
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+There are no anomalies in our dataset. 
