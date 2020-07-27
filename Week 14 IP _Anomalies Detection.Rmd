@@ -1,0 +1,63 @@
+---
+title: "Week 14 IP Anomaly Detection"
+author: "Caroline Akoth"
+date: "7/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Part  $ Anomalies Detection
+
+You have also been requested to check whether there are any anomalies in the given sales dataset. The objective of this task being fraud detection.
+
+## Metric of Success
+To successfully perform anomaly detection
+
+## Experimental Design
+
+1. Data Cleaning 
+  - Identify and Remove/replace  Missing data
+  - Identify and remove duplicate values
+  - Removing anomalies
+  
+2.  Exploratory Data Analysis
+  - Univariate, Bivariate and Multivariate Analysis
+  
+3. Anomaly detection for fraud detection
+
+```{r cars}
+# Installing anomalize package
+ 
+install.packages("anomalize")
+# Load tidyverse and anomalize
+# ---
+# 
+library(tidyverse)
+library(anomalize)
+```
+
+```{r}
+#Load data
+part4 <- read.csv("D:/Education/Self Learning/Data Science/R Tutorials/Week 15 Unsupervised/Supermarket_Sales_Forecasting - Sales.csv")
+head(part4)
+```
+```{r}
+# Dimension
+dim(part4)
+```
+
+## Anomalies Detection
+
+```{r pressure, echo=FALSE}
+# Detecting our anomalies
+part4 %>%
+    time_decompose(count) %>%
+    anomalize(remainder) %>%
+    time_recompose() %>%
+    plot_anomalies(time_recomposed = TRUE, ncol = 3, alpha_dots = 0.5)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
