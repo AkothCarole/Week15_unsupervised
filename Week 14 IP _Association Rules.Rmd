@@ -1,0 +1,248 @@
+---
+title: "Week 14 IP Association Rules"
+author: "Caroline Akoth"
+date: "7/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Association Rules Task
+
+This section will require that you create association rules that will allow you to identify relationships between variables in the dataset. You are provided with a separate dataset that comprises groups of items that will be associated with others. Just like in the other sections, you will also be required to provide insights for your analysis.
+
+## Metric of Success
+To successfully perform association rules
+
+## Experimental Design
+
+1. Data Cleaning 
+  - Identify and Remove/replace  Missing data
+  - Identify and remove duplicate values
+  - Removing anomalies
+  
+2.  Exploratory Data Analysis
+  - Univariate, Bivariate and Multivariate Analysis
+  
+3. Association Rules
+
+
+```{r Read Data}
+part3 <- read.csv("D:/Education/Self Learning/Data Science/R Tutorials/Week 15 Unsupervised/Supermarket_Sales_Dataset II.csv")
+head(part3)
+```
+
+#Read Dimension and Structure
+
+```{r pressure, echo=FALSE}
+dim(part3)
+
+# Dataset has 7500 rows with 20 variables
+```
+#Structure of the data
+
+```{r}
+str(part3)
+
+## All entries are Categorical columns
+```
+## DataTypes
+```{r}
+class(part3)
+```
+
+
+## Find Missing data
+
+```{r}
+colSums(is.na(part3))
+## The Olive oil column is empty
+
+```
+#Find Duplicates
+```{r}
+duplicated(part3)
+```
+#Check Summaries
+```{r}
+summary(part3)
+```
+# Deal with Missing values
+```{r}
+
+```
+#Deal with Duplicates
+
+```{r}
+
+```
+
+# Find outliers
+```{r}
+#Encode the categorical variables
+encode_ordinal <- function(x, order = unique(x)) {
+  x <- as.numeric(factor(x, levels = order))
+  x
+}
+table(part3[["type"]], encode_ordinal(part3[["type"]]), useNA = "ifany")
+new_data <- part3
+new_data[["type_encoded"]] <- encode_ordinal(part3[["type"]])
+# Drop the categorical columns
+new_data = subset(new_data, select = -c(type, nameOrig, nameDest) )
+new_data = subset(new_data, select = -c(isFlaggedFraud))
+head(new_data)
+
+# Checking for outlier
+# Adjusting some graphical parameters.
+par(mar = c(6.1, 4.1, 4.1, 4.1), # change the margins
+    lwd = 2, # increase the line thickness
+    cex.axis = 1.2 # increase default axis label size
+)
+# Drawing boxplot with no axes.
+boxplot(new_data, xaxt = "n", yaxt = "n")
+# Drawing x-axis without labels.
+axis(side = 1, labels = FALSE)
+# Draw y-axis.
+axis(side = 2,
+# Rotate labels perpendicular to y-axis.
+las = 2,
+# Adjust y-axis label positions.
+mgp = c(3, 0.75, 0))
+# Draw the x-axis labels.
+text(x = 1:length(new_data),
+# Move labels to just below bottom of chart.
+y = par("usr")[3] - 0.45,
+# Use names from the data list.
+labels = names(new_data),
+# Change the clipping region.
+xpd = NA,
+# Rotate the labels by 35 degrees.
+srt = 35,
+# Adjust the labels to almost 100% right-justified.
+adj = 0.965,
+# Increase label size.
+cex = 1.2)
+```
+
+Class
+```{r}
+class(part3)
+```
+#Load Libraries
+```{r}
+# We first we install the required arules library 
+#
+install.packages("arules")
+# Loading the arules library
+#
+library(arules)
+```
+# Preview first 5 Entries
+```{r}
+inspect(part3[1:5])
+```
+## Summary of the dataset
+
+```{r}
+summary(part3)
+```
+##Frequencies of some articles
+```{r}
+# Exploring the frequency of some articles 
+# i.e. transacations ranging from 8 to 10 and performing 
+# some operation in percentage terms of the total transactions 
+# 
+itemFrequency(part3[, 8:10],type = "absolute")
+round(itemFrequency(part3[, 8:10],type = "relative")*100,2)
+```
+
+# Chart of Frequencies
+
+```{r}
+# Producing a chart of frequencies and fitering 
+# to consider only items with a minimum percentage 
+# of support/ considering a top x of items
+# ---
+# Displaying top 10 most common items in the transactions dataset 
+# and the items whose relative importance is at least 10%
+# 
+par(mfrow = c(1, 2))
+
+# plot the frequency of items
+itemFrequencyPlot(part3, topN = 10,col="darkgreen")
+itemFrequencyPlot(part3, support = 0.1,col="darkred")
+```
+## Build model
+```{r}
+# Building a model based on association rules 
+# using the apriori function 
+# ---
+# We use Min Support as 0.001 and confidence as 0.8
+# ---
+# 
+rules <- apriori (part3, parameter = list(supp = 0.001, conf = 0.8))
+rules
+
+```
+
+```{r}
+# We use measures of significance and interest on the rules, 
+# determining which ones are interesting and which to discard.
+# ---
+# However since we built the model using 0.001 Min support 
+# and confidence as 0.8 we obtained 410 rules.
+# However, in order to illustrate the sensitivity of the model to these two parameters, 
+# we will see what happens if we increase the support or lower the confidence level
+# 
+
+# Building a apriori model with Min Support as 0.002 and confidence as 0.8.
+rules2 <- apriori (part3,parameter = list(supp = 0.002, conf = 0.8)) 
+
+# Building apriori model with Min Support as 0.002 and confidence as 0.6.
+rules3 <- apriori (part3, parameter = list(supp = 0.001, conf = 0.6)) 
+
+rules2
+
+rules3
+```
+##Exploration of the model
+
+```{r}
+# We can perform an exploration of our model 
+# through the use of the summary function as shown
+# ---
+# Upon running the code, the function would give us information about the model 
+# i.e. the size of rules, depending on the items that contain these rules. 
+# In our above case, most rules have 3 and 4 items though some rules do have upto 6. 
+# More statistical information such as support, lift and confidence is also provided.
+# ---
+# 
+summary(rules)
+```
+##Observing the rules 
+
+```{r}
+# Observing rules built in our model i.e. first 5 model rules
+# ---
+# 
+inspect(rules[1:5])
+
+```
+#Order by level of confidence
+```{r}
+rules<-sort(rules, by="confidence", decreasing=TRUE)
+inspect(rules[1:2])
+```
+# Items bought by some one who bought eggs
+```{r}
+milk<- subset(rules, subset = lhs %pin% "eggs")
+# Then order by confidence
+milk <-sort(milk, by="confidence", decreasing=TRUE)
+inspect(milk[1:5])
+```
+
+## Interpretation
+
+
