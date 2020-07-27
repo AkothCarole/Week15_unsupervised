@@ -1,0 +1,128 @@
+---
+title: "Feature Selection"
+author: "Caroline Akoth"
+date: "7/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Part 2: Feature Selection 
+
+This section requires you to perform feature selection through the use of the unsupervised learning methods learned earlier this week. You will be required to perform your analysis and provide insights on the features that contribute the most information to the dataset.
+
+# Define Metric of Success
+
+Perform feature selection
+
+## Experimental Design
+
+1. Data Cleaning 
+  - Identify and Remove/replace  Missing data
+  - Identify and remove duplicate values
+  - Removing anomalies
+  
+2.  Exploratory Data Analysis
+  - Univariate, Bivariate and Multivariate Analysis
+  
+3. Features Selection
+
+```{r data}
+part2 <- read.csv("D:/Education/Self Learning/Data Science/R Tutorials/Week 15 Unsupervised/Supermarket_Dataset_1 - Sales Data.csv")
+head(part2)
+```
+
+## Dimension and Structure of the dataset
+
+```{r}
+dim(part2)
+
+# This dataset has 1000 entries and 16 columns
+
+```
+
+#Structure
+```{r}
+str(part2)
+# 8 Numerical and 8 categorical columns
+```
+# View Summaries to determine statistics
+
+```{r}
+summary(part2)
+```
+#Find Missing values
+```{r}
+colSums(is.na(part2))
+
+Data has no missing values
+
+```
+#Find Duplicates
+```{r}
+duplicated(part2)
+
+## No Duplicates
+```
+### EDA was performed when conducting PCA
+
+so we'll go ahead and do Feature selection
+
+```{r}
+# Installing and loading our caret package
+# ---
+# 
+suppressWarnings(
+        suppressMessages(if
+                         (!require(caret, quietly=TRUE))
+                install.packages("caret")))
+library(caret)
+```
+
+
+```{r}
+suppressWarnings(
+        suppressMessages(if
+                         (!require(corrplot, quietly=TRUE))
+                install.packages("corrplot")))
+library(corrplot)
+```
+```{r}
+# Calculating the correlation matrix
+# ---
+num_col <- part2[,c(6,7,8,12,13,14,15,16)]
+head(num_col)
+correlationMatrix <- cor(num_col)
+
+# Find attributes that are highly correlated
+# ---
+#
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.75)
+
+# Highly correlated attributes
+# ---
+# 
+highlyCorrelated
+
+names(num_col[,highlyCorrelated])
+```
+```{r}
+# We can remove the variables with a higher correlation 
+# and comparing the results graphically as shown below
+# ---
+# 
+# Removing Redundant Features 
+# ---
+# 
+Dataset2<-num_col[-highlyCorrelated]
+
+# Performing our graphical comparison
+# ---
+# 
+par(mfrow = c(1, 2))
+corrplot(correlationMatrix, order = "hclust")
+corrplot(cor(num_col), order = "hclust")
+```
+
